@@ -48,9 +48,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseMoveSpeed: 4.6
-  movePower: 1.7
+  movePower: 1.6
   accelerationStrength: 4.5
   decelerationStrength: 6
+  maxJumpHeight: 1.2
+  mass: 1
+  airStrafeMoveMultiplier: 0.6
+  groundCheckPosition: {x: 0, y: 0.2, z: 0}
+  groundCheckRadius: 0.35
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!143 &170463000130097151
 CharacterController:
   m_ObjectHideFlags: 0
