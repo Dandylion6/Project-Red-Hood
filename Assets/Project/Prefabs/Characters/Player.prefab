@@ -51,12 +51,12 @@ MonoBehaviour:
   movePower: 1.89
   accelerationStrength: 5.8
   decelerationStrength: 6.4
-  maxJumpHeight: 1.34
+  maxJumpHeight: 3
   mass: 1.85
   jumpPressTimeWindow: 0.2
   groundCheckCooldown: 0.3
   airstrafeMoveDebuff: 15
-  groundCheckPosition: {x: 0, y: 0.28, z: 0}
+  groundCheckPosition: {x: 0, y: 0.25, z: 0}
   groundCheckRadius: 0.4
   groundMask:
     serializedVersion: 2
