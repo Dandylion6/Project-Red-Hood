@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 using static UnityEngine.CullingGroup;
 
 [RequireComponent(typeof(CharacterController))]
@@ -49,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
     private float moveSpeedPercentage = 100.0f;
     private float currentMoveVelocity = 0.0f;
     private float moveInput = 0.0f;
+    private bool facingRight = true;
 
     private float verticalVelocity = Physics.gravity.y;
     private float jumpPressedTimeLeft = 0.0f; // Will give jumping some time left to activate after pressing.
@@ -115,6 +117,20 @@ public class PlayerMovement : MonoBehaviour
         maxMoveSpeed = baseMoveSpeed * moveSpeedPercentage * 0.01f;
         Vector3 moveVelocity = CalculateMoveVelocity();
 
+        //rotation check
+        if (moveInput != 0)
+        {
+            if (moveInput > 0)
+            {
+                facingRight = true;
+            }
+            else
+            {
+                facingRight = false;
+            }
+        }
+
+        transform.rotation = facingRight ? Quaternion.Euler(0, -180, 0) : Quaternion.Euler(0, 0, 0);
         moveVelocity += Vector3.up * verticalVelocity;
         controller.Move(moveVelocity * Time.deltaTime);
     }
