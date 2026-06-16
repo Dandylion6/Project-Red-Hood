@@ -9,10 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3461153490647445548}
+  - component: {fileID: -5198736802293907435}
   - component: {fileID: 7378870423075662253}
   - component: {fileID: 170463000130097151}
   - component: {fileID: 313035776101755080}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -33,8 +34,35 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3705400426998513259}
+  - {fileID: 1368891275256702136}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-5198736802293907435
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4550847742285521869}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b95053d6d77ba44989d30a7a2062fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barrelTransform: {fileID: 1368891275256702136}
+  fireCooldown: 1
+  baseDamage: 40
+  movementSpeedPenalty: 50
+  projectileIgnoreLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  projectileRange: 20
+  projectileSpeed: 30
+  projectileRadius: 0.1
+  penetration: 1
+  noParryCooldownMultiplier: 1.5
+  parryWindow: 0.5
+  maxParryDistance: 2
 --- !u!114 &7378870423075662253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,11 +172,58 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 5dac0cfb-468d-43b3-8bbb-d5e55929609f
     m_ActionName: 'Player/Jump[/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: -5198736802293907435}
+        m_TargetAssemblyTypeName: Musket, Assembly-CSharp
+        m_MethodName: OnFireInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 83486474-1cef-4d51-b277-ea369ef36aed
+    m_ActionName: 'Player/Fire[/Mouse/leftButton]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!1 &5469404911860729533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1368891275256702136}
+  m_Layer: 6
+  m_Name: Musket Barrel Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1368891275256702136
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5469404911860729533}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.3, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3461153490647445548}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8721084458641829511
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,7 +235,7 @@ GameObject:
   - component: {fileID: 3705400426998513259}
   - component: {fileID: 3184546409486203265}
   - component: {fileID: 1604767184084636421}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Character
   m_TagString: Untagged
   m_Icon: {fileID: 0}
