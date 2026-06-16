@@ -88,7 +88,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 886251e9a18ece04ea8e61686c173e1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CameraDistance: 5.15
+  CameraDistance: 8
   DeadZoneDepth: 0
   Composition:
     ScreenPosition: {x: -0.015624709, y: -0.0005555451}
@@ -103,7 +103,7 @@ MonoBehaviour:
   TargetOffset: {x: -1, y: 1, z: 0}
   Damping: {x: 1, y: 1, z: 1}
   Lookahead:
-    Enabled: 0
-    Time: 0
-    Smoothing: 0
+    Enabled: 1
+    Time: 0.6
+    Smoothing: 2
     IgnoreY: 0
