@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem.iOS;
 
 public class CameraController : MonoBehaviour
 {
@@ -11,11 +10,11 @@ public class CameraController : MonoBehaviour
     [SerializeField] private bool staticFollowDistance = false;
     [SerializeField] [Tooltip("The distance from the target when idle; will be default if static follow.")] private float closeFollowDistance = 9.0f;
     [SerializeField] [Tooltip("The distance from the target when moving; will be ignored if static follow.")] private float farFollowDistance = 12.0f;
+    [SerializeField] [Tooltip("The time it takes to change follow distance; will be ignored if static follow.")] private float followDistanceTransitionTime = 3.0f;
     [SerializeField] private float heightOffset = 0.6f;
-    [SerializeField] private float lookAheadOffset = 2.0f;
-    [SerializeField] private float moveSpeedMultiplier = 0.5f;
-    [SerializeField] private Vector3 followTime = new(0.2f, 0.1f, 0.1f);
-    [SerializeField] private float followDistanceTransitionTime = 3.0f;
+    [SerializeField] [Min(0.0f)] private float lookAheadOffset = 2.0f;
+    [SerializeField] [Tooltip("How much move speed affects look ahead; high value means camera will respond more to movement.")] private Vector2 movementFollowMultiplier = Vector2.one;
+    [SerializeField] [Tooltip("How much time it takes to get to the camera target position; lower value means faster responses.")] private Vector3 followTime = new(0.2f, 0.1f, 0.1f);
 
 
     private Vector3 currentVelocity = Vector3.zero;
@@ -58,10 +57,11 @@ public class CameraController : MonoBehaviour
     private Vector3 GetFollowTracking()
     {
         Vector3 tracking = target.position;
-        float lookAhead = lookAheadOffset + movement.CurrentMoveSpeed * moveSpeedMultiplier;
+        Vector2 movementVelocity = movementFollowMultiplier * movement.Velocity;
 
-        tracking += target.forward * lookAhead;
-        tracking += Vector3.up * heightOffset;
+        // Applies offsets and uses velocity for better look ahead.
+        tracking += target.forward * (lookAheadOffset + Mathf.Abs(movementVelocity.x));
+        tracking += Vector3.up * (heightOffset + movementVelocity.y);
         tracking.z = -currentFollowDistance;
 
         return tracking;
