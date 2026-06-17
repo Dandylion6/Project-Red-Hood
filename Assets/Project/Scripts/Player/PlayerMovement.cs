@@ -38,7 +38,8 @@ public class PlayerMovement : MonoBehaviour
 
 
     public float MaxMoveSpeed => maxMoveSpeed;
-    public float CurrentMoveSpeed => currentMoveVelocity;
+    public float CurrentMoveSpeed => Mathf.Abs(currentMoveVelocity);
+    public Vector2 Velocity => new(controller.velocity.x, controller.velocity.y);
     public bool IsGrounded => state == State.Grounded;
     public bool IsJumping => state == State.Jumping;
     public bool IsFalling => state == State.Falling;
