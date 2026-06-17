@@ -16,15 +16,25 @@ public class Teleporter : MonoBehaviour
 
 
     [Header("Teleporter Settings")]
+    [SerializeField] [Tooltip("The name of the scene to teleport to.")] private string currentSceneName = "Current Scene";
     [SerializeField] [Tooltip("The name of the scene to teleport to.")] private string nextSceneName = "Next Scene";
+    [SerializeField] private float teleportCooldown = 1.0f;
+    [SerializeField] private Vector3 playerSpawnOffset = Vector3.zero;
+
+    private float lastTeleportTime = 0.0f;
 
 
     private void Awake()
     {
+        lastTeleportTime = Time.time - teleportCooldown; // Allow immediate teleportation on first load.
+
         // If the player just left the scene that this teleporter leads to, teleport them here.
         bool shouldTeleportHere = lastSceneName == nextSceneName;
         if (!shouldTeleportHere) return;
-        GameManager.Instance.Player.position = transform.position;
+
+        lastTeleportTime = Time.time;
+        GameManager.Instance.Player.position = transform.position + playerSpawnOffset;
+        GameManager.Instance.Player.gameObject.SetActive(true);
     }
 
 
@@ -32,22 +42,20 @@ public class Teleporter : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        lastSceneName = GetCurrentSceneName();
+        float timeSinceLastTeleport = Time.time - lastTeleportTime;
+        if (timeSinceLastTeleport < teleportCooldown) return;
+
+        GameManager.Instance.Player.gameObject.SetActive(false); // Deactivate player to avoid issues during scene transition)
+        lastSceneName = currentSceneName;
+
         SceneManager.LoadScene(nextSceneName, LoadSceneMode.Additive);
+        SceneManager.UnloadSceneAsync(lastSceneName);
     }
 
 
-    private string GetCurrentSceneName()
+    private void OnDrawGizmos()
     {
-        for (int i = 0; i < SceneManager.sceneCount; ++i)
-        {
-            Scene scene = SceneManager.GetSceneAt(i);
-            // Ignores the CoreScene, which is always loaded in gameplay scenes.
-            if (scene.isLoaded && scene.name != "CoreScene")
-            {
-                return scene.name;
-            }
-        }
-        return string.Empty;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position + playerSpawnOffset, 0.5f);
     }
 }
