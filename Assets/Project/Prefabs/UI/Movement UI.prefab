@@ -392,7 +392,7 @@ GameObject:
   - component: {fileID: 5085979192523923289}
   - component: {fileID: 3018822214527487122}
   m_Layer: 5
-  m_Name: MovementUI
+  m_Name: Movement UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

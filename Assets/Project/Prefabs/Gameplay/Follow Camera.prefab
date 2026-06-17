@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5337096844709148309
+--- !u!1 &7308491524333075211
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,52 +8,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7502276110437343622}
-  - component: {fileID: 4996247930056227049}
-  - component: {fileID: 7655075646717481714}
-  - component: {fileID: 597505744199748753}
-  - component: {fileID: 768391348365905209}
+  - component: {fileID: 9059858661303317912}
+  - component: {fileID: 325993638279057860}
+  - component: {fileID: 368336598592076577}
+  - component: {fileID: 7035525381581717454}
+  - component: {fileID: 7516511267303927604}
   m_Layer: 0
   m_Name: Follow Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7502276110437343622
+--- !u!4 &9059858661303317912
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5337096844709148309}
+  m_GameObject: {fileID: 7308491524333075211}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5, z: -12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4996247930056227049
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5337096844709148309}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f05933e93587c94ca6020e5c05f52a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!20 &7655075646717481714
+--- !u!20 &325993638279057860
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5337096844709148309}
+  m_GameObject: {fileID: 7308491524333075211}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
@@ -80,10 +68,10 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 50
   orthographic: 0
   orthographic size: 5
-  m_Depth: 0
+  m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -98,21 +86,21 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &597505744199748753
+--- !u!81 &368336598592076577
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5337096844709148309}
+  m_GameObject: {fileID: 7308491524333075211}
   m_Enabled: 1
---- !u!114 &768391348365905209
+--- !u!114 &7035525381581717454
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5337096844709148309}
+  m_GameObject: {fileID: 7308491524333075211}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
@@ -150,3 +138,24 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &7516511267303927604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7308491524333075211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f05933e93587c94ca6020e5c05f52a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movement: {fileID: 0}
+  target: {fileID: 0}
+  closeFollowDistance: 10
+  farFollowDistance: 12
+  heightOffset: 1.2
+  lookAheadOffset: 1
+  moveSpeedMultiplier: 0.5
+  followTime: {x: 0.2, y: 0.15, z: 0.1}
+  followDistanceTransitionTime: 1.5
