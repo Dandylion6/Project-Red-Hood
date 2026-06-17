@@ -42,8 +42,7 @@ public class Musket : MonoBehaviour
     [SerializeField] [Tooltip("The number of times the projectile can penetrate targets")] private int penetration = 1;
 
     [Header("Parry Settings")]
-    [SerializeField] [Tooltip("Multiplier for cooldown when no parry is performed")] private float noParryCooldownMultiplier = 1.5f;
-    [SerializeField] [Tooltip("The time window during which a parry can be executed; a higher value is more forgiving.")] private float parryWindow = 0.5f;
+    [SerializeField] [Tooltip("Multiplier for cooldown when parry is performed")] private float parryCooldownMultiplier = 1.5f;
     [SerializeField] [Tooltip("The range which the projectile will instantly travel in order to parry; afterward it will have normal travel speed.")] private float maxParryDistance = 2.0f;
 
 
@@ -72,7 +71,7 @@ public class Musket : MonoBehaviour
         {
             OnParry(parryable);
 
-            fireCooldownLeft = fireCooldown * noParryCooldownMultiplier; // Applies a cooldown multiplier for parries.
+            fireCooldownLeft = fireCooldown * parryCooldownMultiplier; // Applies a cooldown multiplier for parries.
 
             if (parryable is not IDamageable damageable) return;
             damageable.TakeDamage(baseDamage);
@@ -92,8 +91,11 @@ public class Musket : MonoBehaviour
         if (Physics.SphereCast(barrelTransform.position, projectileRadius, barrelTransform.forward, out RaycastHit hit, maxParryDistance, ~projectileIgnoreLayers))
         {
             parryable = hit.collider.GetComponent<IParryable>();
-            return true;
+
+            if (parryable == null) return false;
+            return parryable.CanParry();
         }
+
         return false;
     }
 
@@ -101,6 +103,7 @@ public class Musket : MonoBehaviour
     private void OnParry(IParryable parryable)
     {
         parryable.Parry();
+        // Add effects or sounds for parry here if needed.
     }
 
 
