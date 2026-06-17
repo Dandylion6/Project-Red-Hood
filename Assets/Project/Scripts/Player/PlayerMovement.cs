@@ -1,20 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
-using static UnityEngine.CullingGroup;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
     private const float SPEED_PERCENTAGE_POWER_MULT = 0.5f; // How much speed scales with power.
-
-
-    public enum State
-    {
-        Grounded,
-        Jumping,
-        Falling
-    }
 
 
     [Header("Movement Settings")]
@@ -27,36 +17,33 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Jump Settings")]
     [SerializeField] private float maxJumpHeight = 1.2f;
-    [SerializeField] private float mass = 1.0f;
-    [SerializeField] [Tooltip("The window in which a jump will occur after pressing whenever possible in seconds.")] private float jumpPressTimeWindow = 0.2f;
-    [SerializeField] [Tooltip("The seconds that ground checks will be ignored after jumping.")] private float groundCheckCooldown = 0.3f;
-    [SerializeField] [Tooltip("Applies a percentage debuff to max speed and power while in the air.")] private float airstrafeMoveDebuff = 40.0f;
+    [SerializeField] [Tooltip("The time window in which a jump will occur after pressing whenever possible in seconds.")] [Min(0.0f)] private float jumpPressTimeWindow = 0.2f;
+    [SerializeField] [Tooltip("The time window in which you can still jump after not being grounded in seconds")] [Min(0.0f)] private float coyoteTime = 0.1f;
+    [SerializeField] [Tooltip("Applies a percentage debuff to max speed and power while in the air.")] [Range(0.0f, 100.0f)] private float airstrafeMoveDebuff = 40.0f;
+    [SerializeField] private float fallingGravityMultiplier = 1.5f;
+    [SerializeField] private float jumpCutOffMultiplier = 0.2f;
     [SerializeField] private Vector3 groundCheckPosition = Vector3.zero;
-    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] [Min(0.01f)] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundMask = new();
-    [SerializeField] [Tooltip("How much gravity to have after falling.")] private float fallingGravityMultiplier = 1.2f;
 
 
+    public Vector2 Velocity => velocity;
     public float MaxMoveSpeed => maxMoveSpeed;
-    public float CurrentMoveSpeed => Mathf.Abs(currentMoveVelocity);
-    public Vector2 Velocity => new(controller.velocity.x, controller.velocity.y);
-    public bool IsGrounded => state == State.Grounded;
-    public bool IsJumping => state == State.Jumping;
-    public bool IsFalling => state == State.Falling;
+    public bool IsJumping => isJumping;
+    public bool IsGrounded => isGrounded;
 
+    private Rigidbody body = null;
 
-    private CharacterController controller = null;
-
+    private Vector2 velocity = Vector2.zero;
     private float maxMoveSpeed = 0.0f;
     private float moveSpeedPercentage = 100.0f;
-    private float currentMoveVelocity = 0.0f;
     private float moveInput = 0.0f;
-    private bool facingRight = true;
+    private bool isFacingRight = true;
 
-    private float verticalVelocity = Physics.gravity.y;
+    private float timeSinceGrounded = 0.0f;
     private float jumpPressedTimeLeft = 0.0f; // Will give jumping some time left to activate after pressing.
-    private float groundCheckIgnoreLeft = 0.0f;
-    private State state = State.Falling;
+    private bool isJumping = false;
+    private bool isGrounded = false;
     private bool isAirstrafeDebuffActive = false;
 
 
@@ -70,143 +57,112 @@ public class PlayerMovement : MonoBehaviour
     public void OnJumpInput(InputAction.CallbackContext context)
     {
         if (context.performed) jumpPressedTimeLeft = jumpPressTimeWindow;
-
-        // Will shorten the jump.
-        if (state == State.Jumping && context.canceled)
+        else if (context.canceled && isJumping)
         {
-            state = State.Falling;
-            groundCheckIgnoreLeft = 0.0f;
+            // Reduces the velocity to end the jump early.
+            body.linearVelocity = new(body.linearVelocity.x, body.linearVelocity.y * jumpCutOffMultiplier, body.linearVelocity.z);
         }
     }
 
 
-    /// <summary>
-    /// Adds a percentage buff to the movement speed.
-    /// </summary>
     public void AddSpeedBuff(float percentage) => moveSpeedPercentage += percentage;
-
-    /// <summary>
-    /// Adds a percentage de-buff to the movement speed.
-    /// </summary>
     public void AddSpeedDebuff(float percentage) => moveSpeedPercentage -= percentage;
 
-    /// <summary>
-    /// Removes a percentage buff to the movement speed.
-    /// </summary>
     public void RemoveSpeedBuff(float percentage) => moveSpeedPercentage -= percentage;
-
-    /// <summary>
-    /// Removes a percentage de-buff to the movement speed.
-    /// </summary>
     public void RemoveSpeedDebuff(float percentage) => moveSpeedPercentage += percentage;
 
 
 
     private void Start()
     {
-        controller = GetComponent<CharacterController>();
+        body = GetComponent<Rigidbody>();
     }
 
 
     private void Update()
     {
-        UpdateGravity();
-        UpdateJump();
+        CheckGround();
+        UpdateRotation();
+    }
 
+
+    private void CheckGround()
+    {
+        Vector3 checkPoint = transform.position + groundCheckPosition;
+        isGrounded = Physics.CheckSphere(checkPoint, groundCheckRadius, groundMask);
+        timeSinceGrounded = isGrounded ? 0.0f : timeSinceGrounded + Time.deltaTime;
+    }
+
+
+    private void UpdateRotation()
+    {
+        bool isMoving = Mathf.Abs(moveInput) > float.Epsilon;
+        if (isMoving)
+            isFacingRight = moveInput > 0.0f;
+
+        transform.rotation = isFacingRight ? Quaternion.Euler(0.0f, 90.0f, 0.0f) : Quaternion.Euler(0.0f, -90.0f, 0.0f);
+    }
+
+
+    private void FixedUpdate()
+    {
+        UpdateJump();
         UpdateAirStrafe();
 
         maxMoveSpeed = baseMoveSpeed * moveSpeedPercentage * 0.01f;
-        Vector3 moveVelocity = CalculateMoveVelocity();
+        Vector3 moveForce = CalculateMoveForce();
 
-        //rotation check
-        if (moveInput != 0)
-        {
-            if (moveInput > 0)
-            {
-                facingRight = true;
-            }
-            else
-            {
-                facingRight = false;
-            }
-        }
-
-        transform.rotation = facingRight ? Quaternion.Euler(0, 90, 0) : Quaternion.Euler(0, -90, 0);
-        moveVelocity += Vector3.up * verticalVelocity;
-        controller.Move(moveVelocity * Time.deltaTime);
+        body.AddForce(moveForce);
+        velocity = new(body.linearVelocity.x, body.linearVelocity.y);
     }
 
-
-    /// <summary>
-    /// Applies a down force based on mass and gravity after checking whether the player is grounded.
-    /// </summary>
-    private void UpdateGravity()
+    
+    private bool CanJump()
     {
-        if (groundCheckIgnoreLeft > float.Epsilon)
-        {
-            ApplyGravity();
-            groundCheckIgnoreLeft -= Time.deltaTime;
-            return;
-        }
-
-        Vector3 checkPoint = transform.position + groundCheckPosition;
-        bool isGrounded = Physics.CheckSphere(checkPoint, groundCheckRadius, groundMask);
-        if (isGrounded)
-        {
-            state = State.Grounded;
-            verticalVelocity = Physics.gravity.y; // This is to make sure the player 'sticks' to the ground.
-            return;
-        }
-
-        state = State.Falling;
-        ApplyGravity();
-    }
-
-
-    private void ApplyGravity()
-    {
-        float multiplier = state == State.Falling ? fallingGravityMultiplier : 1.0f;
-        verticalVelocity += mass * Physics.gravity.y * multiplier * Time.deltaTime;
+        if (isJumping) return false;
+        if (jumpPressedTimeLeft <= float.Epsilon) return false;
+        if (timeSinceGrounded > coyoteTime) return false;
+        return true;
     }
 
 
     private void UpdateJump()
     {
-        bool canJump = jumpPressedTimeLeft > float.Epsilon && state == State.Grounded;
-        if (canJump)
+        jumpPressedTimeLeft = Mathf.Max(jumpPressedTimeLeft - Time.fixedDeltaTime, 0.0f);
+
+        bool isFalling = body.linearVelocity.y <= float.Epsilon;
+        if (isFalling)
         {
-            jumpPressedTimeLeft = 0.0f;
-            Jump();
+            isJumping = false;
+            Vector3 fallingGravity = (fallingGravityMultiplier - 1.0f) * Time.deltaTime * Physics.gravity;
+            body.linearVelocity += fallingGravity;
         }
 
-        jumpPressedTimeLeft = Mathf.Max(jumpPressedTimeLeft - Time.deltaTime, 0.0f);
-        
-        if (state == State.Grounded) return;
-        if (verticalVelocity <= float.Epsilon)
-            state = State.Falling;
+        if (!CanJump()) return;
+
+        jumpPressedTimeLeft = 0.0f;
+        Jump();
     }
 
 
     private void Jump()
     {
-        state = State.Jumping;
-        groundCheckIgnoreLeft = groundCheckCooldown;
-
-        float jumpVelocity = Mathf.Sqrt(2.0f * mass * Mathf.Abs(Physics.gravity.y) * maxJumpHeight);
-        verticalVelocity = jumpVelocity;
+        isJumping = true;
+        float jumpVelocity = Mathf.Sqrt(2.0f * Mathf.Abs(Physics.gravity.y) * maxJumpHeight);
+        body.linearVelocity = new(body.linearVelocity.x, jumpVelocity, body.linearVelocity.z);
     }
 
 
     private void UpdateAirStrafe()
     {
-        if (state == State.Grounded && isAirstrafeDebuffActive)
+        if (isGrounded && isAirstrafeDebuffActive)
         {
             RemoveSpeedDebuff(airstrafeMoveDebuff);
             isAirstrafeDebuffActive = false;
             return;
         }
         
-        if (state == State.Falling && !isAirstrafeDebuffActive)
+        if (!isGrounded && !isJumping && !isAirstrafeDebuffActive)
         {
             AddSpeedDebuff(airstrafeMoveDebuff);
             isAirstrafeDebuffActive = true;
@@ -221,25 +177,25 @@ public class PlayerMovement : MonoBehaviour
     /// <returns>
     /// A Vector3 that moves the player based on input.
     /// </returns>
-    private Vector3 CalculateMoveVelocity()
+    private Vector3 CalculateMoveForce()
     {
         bool isAccelerating = Mathf.Abs(moveInput) > float.Epsilon;
         float acceleration = isAccelerating ? accelerationStrength : decelerationStrength;
 
         float targetVelocity = moveInput * maxMoveSpeed;
-        float velocityDifference = targetVelocity - currentMoveVelocity;
+        float velocityDifference = targetVelocity - body.linearVelocity.x;
 
         float powerMultiplier = moveSpeedPercentage * 0.01f * SPEED_PERCENTAGE_POWER_MULT;
         float velocity = Mathf.Pow(Mathf.Abs(velocityDifference), movePower * powerMultiplier);
+        float force = acceleration * Mathf.Sign(velocityDifference) * velocity;
 
-        currentMoveVelocity += Mathf.Sign(velocityDifference) * velocity * acceleration * Time.deltaTime;
-        return Vector3.right * currentMoveVelocity;
+        return force * Vector3.right;
     }
 
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = state == State.Grounded ? Color.green : Color.red;
+        Gizmos.color = isGrounded ? Color.green : Color.red;
         Gizmos.DrawWireSphere(transform.position + groundCheckPosition, groundCheckRadius);
     }
 }
