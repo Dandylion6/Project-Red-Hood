@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -23,5 +22,6 @@ static public class EditorCoreLoader
 
         // Loads the core scene for any other scene additively
         SceneManager.LoadScene("CoreScene", LoadSceneMode.Additive);
+        SceneManager.sceneLoaded -= OnSceneLoad; // Only happens once.
     }
 }
