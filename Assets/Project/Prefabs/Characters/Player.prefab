@@ -60,8 +60,7 @@ MonoBehaviour:
   projectileSpeed: 30
   projectileRadius: 0.1
   penetration: 1
-  noParryCooldownMultiplier: 1.5
-  parryWindow: 0.5
+  parryCooldownMultiplier: 1.5
   maxParryDistance: 2
 --- !u!114 &7378870423075662253
 MonoBehaviour:
