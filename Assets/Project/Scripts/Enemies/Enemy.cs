@@ -9,7 +9,14 @@ public class Enemy : MonoBehaviour, IDamageable, IParryable
 
     public void TakeDamage(float damage)
     {
-        health -= damage;
+        health = Mathf.Max(health - damage, 0.0f);
+        if (health <= float.Epsilon) Die();
+    }
+
+
+    public void Die()
+    {
+        Destroy(gameObject);
     }
 
 
@@ -21,6 +28,6 @@ public class Enemy : MonoBehaviour, IDamageable, IParryable
 
     public void Parry()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Enemy parried!");
     }
 }
