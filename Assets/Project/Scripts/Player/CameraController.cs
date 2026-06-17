@@ -1,7 +1,14 @@
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class CameraController : Singleton<CameraController>
 {
+    public enum Type
+    {
+        Follow,
+        Region,
+    }
+
+
     [Header("References")]
     [SerializeField] private PlayerMovement movement = null;
 
@@ -16,11 +23,32 @@ public class CameraController : MonoBehaviour
     [SerializeField] [Tooltip("How much move speed affects look ahead; high value means camera will respond more to movement.")] private Vector2 movementFollowMultiplier = Vector2.one;
     [SerializeField] [Tooltip("How much time it takes to get to the camera target position; lower value means faster responses.")] private Vector3 followTime = new(0.2f, 0.1f, 0.1f);
 
+    [Header("Transition Settings")]
+    [SerializeField] private Vector3 toRegionTime = new(0.4f, 0.2f, 0.2f);
 
+
+    public CameraRegion ActiveRegion => activeRegion;
+
+    private CameraRegion activeRegion = null;
+    private Type currentType = Type.Follow;
     private Vector3 currentVelocity = Vector3.zero;
     private Vector3 trackingPosition = Vector3.zero;
     private float distanceVelocity = 0.0f;
     private float currentFollowDistance = 0.0f;
+
+
+    public void AttachCameraRegion(CameraRegion region)
+    {
+        activeRegion = region;
+        currentType = Type.Region;
+    }
+
+
+    public void DetachCameraRegion()
+    {
+        currentType = Type.Follow;
+        activeRegion = null;
+    }
 
 
     private void Start()
@@ -30,7 +58,30 @@ public class CameraController : MonoBehaviour
     }
 
 
-    void Update()
+    private void Update()
+    {
+        switch (currentType)
+        {
+            case Type.Follow: UpdateFollow();
+                break;
+            case Type.Region: UpdateRegion(); 
+                break;
+
+        }
+
+        // Smoothly move the camera towards the tracking position with each axis separated.
+        Vector3 currentPosition = transform.position;
+
+        Vector3 currentSmoothTime = currentType == Type.Region ? toRegionTime : followTime;
+        currentPosition.x = Mathf.SmoothDamp(currentPosition.x, trackingPosition.x, ref currentVelocity.x, currentSmoothTime.x);
+        currentPosition.y = Mathf.SmoothDamp(currentPosition.y, trackingPosition.y, ref currentVelocity.y, currentSmoothTime.y);
+        currentPosition.z = Mathf.SmoothDamp(currentPosition.z, trackingPosition.z, ref currentVelocity.z, currentSmoothTime.z);
+
+        transform.position = currentPosition;
+    }
+
+
+    private void UpdateFollow()
     {
         if (!staticFollowDistance)
         {
@@ -39,18 +90,12 @@ public class CameraController : MonoBehaviour
         }
 
         trackingPosition = GetFollowTracking();
-        UpdateFollow();
     }
 
 
-    private void UpdateFollow()
+    private void UpdateRegion()
     {
-        // Smoothly move the camera towards the tracking position with each axis separated.
-        Vector3 currentPosition = transform.position;
-        currentPosition.x = Mathf.SmoothDamp(currentPosition.x, trackingPosition.x, ref currentVelocity.x, followTime.x);
-        currentPosition.y = Mathf.SmoothDamp(currentPosition.y, trackingPosition.y, ref currentVelocity.y, followTime.y);
-        currentPosition.z = Mathf.SmoothDamp(currentPosition.z, trackingPosition.z, ref currentVelocity.z, followTime.z);
-        transform.position = currentPosition;
+        trackingPosition = activeRegion.CameraPosition;
     }
 
 
