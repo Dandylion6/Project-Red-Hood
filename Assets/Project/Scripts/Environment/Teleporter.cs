@@ -18,22 +18,34 @@ public class Teleporter : MonoBehaviour
     [Header("Teleporter Settings")]
     [SerializeField] [Tooltip("The name of the scene to teleport to.")] private string nextSceneName = "Next Scene";
 
+    private bool justTeleported = false; // Makes sure the player doesn't immediately re-trigger the teleporter on the other side and end up in an infinite teleport loop.
+
 
     private void Awake()
     {
         // If the player just left the scene that this teleporter leads to, teleport them here.
         bool shouldTeleportHere = lastSceneName == nextSceneName;
         if (!shouldTeleportHere) return;
+
         GameManager.Instance.Player.position = transform.position;
+        justTeleported = true;
     }
 
 
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
+        if (justTeleported) return;
 
         lastSceneName = GetCurrentSceneName();
         SceneManager.LoadScene(nextSceneName, LoadSceneMode.Additive);
+    }
+
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+        justTeleported = false;
     }
 
 
