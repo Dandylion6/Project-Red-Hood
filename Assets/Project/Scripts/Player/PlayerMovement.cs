@@ -130,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        transform.rotation = facingRight ? Quaternion.Euler(0, -180, 0) : Quaternion.Euler(0, 0, 0);
+        transform.rotation = facingRight ? Quaternion.Euler(0, 90, 0) : Quaternion.Euler(0, -90, 0);
         moveVelocity += Vector3.up * verticalVelocity;
         controller.Move(moveVelocity * Time.deltaTime);
     }
