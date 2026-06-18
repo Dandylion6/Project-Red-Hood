@@ -67,13 +67,14 @@ public class Musket : MonoBehaviour
     private void Fire()
     {
         // Before becoming a projectile, we first check if we can parry something.
-        if (CanParry(out IParryable parryable))
+        if (CanParry(out Stunnable stunnable))
         {
-            OnParry(parryable);
-
+            stunnable.Stun();
+            OnParry();
             fireCooldownLeft = fireCooldown * parryCooldownMultiplier; // Applies a cooldown multiplier for parries.
 
-            if (parryable is not IDamageable damageable) return;
+            // Try to still damage them if possible.
+            if (!stunnable.TryGetComponent(out IDamageable damageable)) return;
             damageable.TakeDamage(baseDamage);
             return;
         }
@@ -85,24 +86,23 @@ public class Musket : MonoBehaviour
     }
 
 
-    private bool CanParry(out IParryable parryable)
+    private bool CanParry(out Stunnable stunnable)
     {
-        parryable = null;
+        stunnable = null;
         if (Physics.SphereCast(barrelTransform.position, projectileRadius, barrelTransform.forward, out RaycastHit hit, maxParryDistance, ~projectileIgnoreLayers))
         {
-            parryable = hit.collider.GetComponent<IParryable>();
+            stunnable = hit.collider.GetComponent<Stunnable>();
 
-            if (parryable == null) return false;
-            return parryable.CanParry();
+            if (stunnable == null) return false;
+            return stunnable.CanStun();
         }
 
         return false;
     }
 
 
-    private void OnParry(IParryable parryable)
+    private void OnParry()
     {
-        parryable.Parry();
         // Add effects or sounds for parry here if needed.
     }
 

@@ -1,9 +1,12 @@
 using UnityEngine;
 
-public class Enemy : MonoBehaviour, IDamageable, IParryable
+[RequireComponent(typeof(Stunnable))]
+public class Enemy : MonoBehaviour, IDamageable
 {
     public float Health => health;
 
+
+    private Stunnable stunnable = null;
     private float health = 100.0f;
 
 
@@ -20,14 +23,16 @@ public class Enemy : MonoBehaviour, IDamageable, IParryable
     }
 
 
-    public bool CanParry()
+    private void Start()
+    {
+        stunnable = GetComponent<Stunnable>();
+        stunnable.SubscribeToCanStun(CanParry);
+    }
+
+
+    private bool CanParry()
     {
         return true;
     }
 
-
-    public void Parry()
-    {
-        Debug.Log("Enemy parried!");
-    }
 }
