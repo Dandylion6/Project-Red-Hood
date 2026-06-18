@@ -59,13 +59,15 @@ public class Musket : MonoBehaviour
 
     private bool CanFire()
     {
-        if (fireCooldownLeft > 0.0f) return false;
+        if (fireCooldownLeft > float.Epsilon) return false;
         return true;
     }
 
 
     private void Fire()
     {
+        Debug.Log("Fired!");
+
         // Before becoming a projectile, we first check if we can parry something.
         if (CanParry(out Stunnable stunnable))
         {
@@ -111,6 +113,8 @@ public class Musket : MonoBehaviour
     {
         for (int i = 0; i < projectiles.Count; ++i)
             UpdateProjectile(i);
+
+        fireCooldownLeft = Mathf.Max(fireCooldownLeft - Time.deltaTime, 0.0f);
     }
 
 

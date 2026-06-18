@@ -1,9 +1,16 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Stunnable))]
-public class Enemy : MonoBehaviour, IDamageable
+public abstract class Enemy : MonoBehaviour, IDamageable
 {
+    [Header("Base Settings")]
+    [SerializeField] private float maxHealth = 100.0f;
+
+
+    public float MaxHealth => maxHealth;
     public float Health => health;
+   
+    protected Stunnable Stunnable => stunnable;
 
 
     private Stunnable stunnable = null;
@@ -17,10 +24,17 @@ public class Enemy : MonoBehaviour, IDamageable
     }
 
 
-    public void Die()
+    public virtual void Die()
     {
         Destroy(gameObject);
     }
+
+
+    protected abstract bool CanParry();
+
+    protected abstract bool CanAttack();
+
+    protected abstract void Attack();
 
 
     private void Start()
@@ -28,11 +42,4 @@ public class Enemy : MonoBehaviour, IDamageable
         stunnable = GetComponent<Stunnable>();
         stunnable.SubscribeToCanStun(CanParry);
     }
-
-
-    private bool CanParry()
-    {
-        return true;
-    }
-
 }
