@@ -154,9 +154,9 @@ MonoBehaviour:
   target: {fileID: 0}
   staticFollowDistance: 0
   closeFollowDistance: 10
-  farFollowDistance: 11.5
+  farFollowDistance: 13.5
   followDistanceTransitionTime: 1.6
-  heightOffset: 1.2
+  heightOffset: 2.5
   lookAheadOffset: 0.8
   movementFollowMultiplier: {x: 0.4, y: 0.1}
   followTime: {x: 0.24, y: 0.15, z: 0.3}
